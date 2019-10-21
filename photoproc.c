@@ -232,6 +232,7 @@ photoproc(struct tstat *tasklist, int maxtask)
 
 	dirp = opendir(".");
 
+	//打开/proc目录，遍在所有进程目录
 	while ( (entp = readdir(dirp)) && tval < maxtask )
 	{
 		/*
@@ -457,6 +458,7 @@ counttasks(void)
 /*
 ** open file "stat" and obtain required info
 */
+//读取/proc/$pic/stat文件
 static int
 procstat(struct tstat *curtask, unsigned long long bootepoch, char isproc)
 {
@@ -490,6 +492,7 @@ procstat(struct tstat *curtask, unsigned long long bootepoch, char isproc)
 	if ( (nr = cmdtail-cmdhead-1) > PNAMLEN)
 		nr = PNAMLEN;
 
+	//填充进程名称
 	p = curtask->gen.name;
 
 	memcpy(p, cmdhead+1, nr);
@@ -509,8 +512,10 @@ procstat(struct tstat *curtask, unsigned long long bootepoch, char isproc)
 	curtask->cpu.policy  = 0;
 	curtask->gen.excode  = 0;
 
+	//填充进程id
 	sscanf(line, "%d", &(curtask->gen.pid));  /* fetch pid */
 
+	//解析填充进程状态,父pid,
 	nr = sscanf(cmdtail+2, SCANSTAT,
 		&(curtask->gen.state), 	&(curtask->gen.ppid),
 		&(curtask->mem.minflt),	&(curtask->mem.majflt),
@@ -732,6 +737,7 @@ procio(struct tstat *curtask)
 **    - tabs (e.g. arguments for awk or sed)
 ** these special bytes will be converted to spaces
 */
+//读取/proc/$pid/cmdline文件，存储命令行
 static void
 proccmd(struct tstat *curtask)
 {
