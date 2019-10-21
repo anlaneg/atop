@@ -384,6 +384,7 @@ rawread(void)
 	   ** if no filename is specified, assemble the name of the raw file
 	   */
 	   case 0:
+		   //未指定raw data文件名称时，使用以下默认文件
 		timenow	= time(0);
 		tp	= localtime(&timenow);
 
@@ -400,9 +401,11 @@ rawread(void)
 	   ** the full pathname of the raw file
 	   */
 	   case 8:
+		   //仅指定了raw data时间，检查文件路径，如果存在，则跳出
 		if ( access(rawname, F_OK) == 0) 
 			break;		/* existing file */
 
+		//不存在时，在BASEPATH目录下检查指定文件名称
 		if (lookslikedatetome(rawname))
 		{
 			char	savedname[RAWNAMESZ];
@@ -422,9 +425,12 @@ rawread(void)
 	   ** of y's).
 	   */
 	   default:
+		   //其它情况，直接检查文件路径
 		if ( access(rawname, F_OK) == 0) 
 			break;		/* existing file */
 
+		//如果指定的文件路径并不存在，检查是否为'y+'名称文件，如果是，则构造
+		//当前时间对应日志文件
 		/*
 		** make a string existing of y's to compare with
 		*/
@@ -455,6 +461,7 @@ rawread(void)
 	** make sure the file is a regular file (seekable) or
 	** a pipe (not seekable)
 	*/
+	//rawname必须是一个普通文件
 	if (stat(rawname, &filestat) == -1)
 	{
 		fprintf(stderr, "%s - ", rawname);
@@ -473,8 +480,10 @@ rawread(void)
 	/*
 	** open raw file
 	*/
+	//打开这个raw 文件
 	if ( (rawfd = open(rawname, O_RDONLY)) == -1)
 	{
+		//如果打开此文件失败，则尝试.gz后缀文件，并构造临时文件通过gnuzip执行解压
 		char	command[512], tmpname1[RAWNAMESZ], tmpname2[RAWNAMESZ];
 
 		/*
@@ -517,6 +526,7 @@ rawread(void)
 	/*
 	** read the raw header and verify the magic
 	*/
+	//读取raw data文件，并校验其头部
 	if ( readchunk(rawfd, &rh, sizeof rh) < sizeof rh)
 	{
 		fprintf(stderr, "can not read raw file header\n");

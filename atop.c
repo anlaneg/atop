@@ -314,8 +314,8 @@ unsigned long 	sampcnt;
 char		screen;
 int		linelen  = 80;
 char		acctreason;	/* accounting not active (return val) 	*/
-char		rawname[RAWNAMESZ];
-char		rawreadflag;
+char		rawname[RAWNAMESZ];//raw文件名称
+char		rawreadflag;//需要读raw data文件
 unsigned int	begintime, endtime;
 char		flaglist[MAXFL];
 char		deviatonly = 1;
@@ -475,6 +475,7 @@ main(int argc, char *argv[])
 	/*
 	** read defaults-files /etc/atoprc en $HOME/.atoprc (if any)
 	*/
+	//先加载/etc/atoprc，再加载~/.atoprc文件
 	readrc("/etc/atoprc", 1);
 
 	if ( (p = getenv("HOME")) )
@@ -495,6 +496,7 @@ main(int argc, char *argv[])
 	else
 		p = argv[0];
 
+	//检查如果程序名称为atopsar,则调用atopsar完成功能请求
 	if ( memcmp(p, "atopsar", 7) == 0)
 		return atopsar(argc, argv);
 
@@ -523,6 +525,7 @@ main(int argc, char *argv[])
 				printf("%s\n", getstrvers());
 				exit(0);
 
+				//写raw data文件
 			   case 'w':		/* writing of raw data ?      */
 				rawwriteflag++;
 				if (optind >= argc)
@@ -532,6 +535,7 @@ main(int argc, char *argv[])
 				vis.show_samp = rawwrite;
 				break;
 
+				//读raw data文件
 			   case 'r':		/* reading of raw data ?      */
 				if (optind < argc && *(argv[optind]) != '-')
 					strncpy(rawname, argv[optind++],
@@ -553,11 +557,13 @@ main(int argc, char *argv[])
 				break;
 
                            case 'b':		/* begin time ?               */
+                        	   //指定起始时间
 				if ( !hhmm2secs(optarg, &begintime) )
 					prusage(argv[0]);
 				break;
 
                            case 'e':		/* end   time ?               */
+                        	   //指定结束时间
 				if ( !hhmm2secs(optarg, &endtime) )
 					prusage(argv[0]);
 				break;
@@ -628,6 +634,7 @@ main(int argc, char *argv[])
 	*/
 	if (rawreadflag)
 	{
+		//完成raw data读取，并退出进程
 		rawread();
 		cleanstop(0);
 	}
@@ -1117,6 +1124,7 @@ extern int get_posval(char *name, char *val);
 void
 do_interval(char *name, char *val)
 {
+	//配置interval
 	interval = get_posval(name, val);
 }
 
@@ -1145,12 +1153,14 @@ readrc(char *path, int syslevel)
 
 		fp = fopen(path, "r");
 
+		//自path中读取一行数据
 		while ( fgets(linebuf, sizeof linebuf, fp) )
 		{
 			line++;
 
 			i = strlen(linebuf);
 
+			//删除'\n',替换为'\0'
 			if (i > 0 && linebuf[i-1] == '\n')
 				linebuf[i-1] = 0;
 
@@ -1190,6 +1200,7 @@ readrc(char *path, int syslevel)
 			** tag name and tag value found
 			** try to recognize tag name
 			*/
+			//通过tagname找到对应的manrc函数，并执行调用,设置相应的配置参数
 			for (i=0; i < sizeof manrc/sizeof manrc[0]; i++)
 			{
 				if ( strcmp(tagname, manrc[i].tag) == 0)
@@ -1214,6 +1225,7 @@ readrc(char *path, int syslevel)
 			/*
 			** tag name not recognized
 			*/
+			//对不认识的tag，进行报错
 			if (i == sizeof manrc/sizeof manrc[0])
 			{
 				fprintf(stderr,

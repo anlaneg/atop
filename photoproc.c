@@ -232,19 +232,21 @@ photoproc(struct tstat *tasklist, int maxtask)
 
 	dirp = opendir(".");
 
-	//打开/proc目录，遍在所有进程目录
+	//打开/proc目录，遍历所有进程目录
 	while ( (entp = readdir(dirp)) && tval < maxtask )
 	{
 		/*
 		** skip non-numerical names
 		*/
 		if (!isdigit(entp->d_name[0]))
+			//仅考虑进程目录
 			continue;
 
 		/*
 		** change to the process' subdirectory
 		*/
 		if ( chdir(entp->d_name) != 0 )
+			//更改当前目录为进程的子目录
 			continue;
 
 		/*
