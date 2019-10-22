@@ -34,7 +34,9 @@ struct tstat {
 	/* GENERAL TASK INFO 					*/
 	struct gen {
 		int	tgid;		/* threadgroup identification 	*/
+		//进程id
 		int	pid;		/* process identification 	*/
+		//父进程id
 		int	ppid;           /* parent process identification*/
 		int	ruid;		/* real  user  identification 	*/
 		int	euid;		/* eff.  user  identification 	*/
@@ -50,11 +52,13 @@ struct tstat {
 		char 	isproc;		/* boolean: process level?      */
 		char 	state;		/* process state ('E' = exited)	*/
 		int	excode;		/* process exit status		*/
+		//进程启动时间
 		time_t 	btime;		/* process start time (epoch)	*/
 		time_t 	elaps;		/* process elaps time (hertz)	*/
 		char	cmdline[CMDLEN+1];/* command-line string       	*/
 		int	nthrslpi;	/* # threads in state 'S'       */
 		int	nthrslpu;	/* # threads in state 'D'       */
+		//当前进程处于running状态的线程数
 		int	nthrrun;	/* # threads in state 'R'       */
 
 		int	ctid;		/* OpenVZ container ID		*/

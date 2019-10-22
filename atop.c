@@ -917,7 +917,9 @@ engine(void)
 
 		do
 		{
+			//先获取进程，线程合起来的总数
 			curtlen   = counttasks();	// worst-case value
+			//申请统计空间
 			curtpres  = realloc(curtpres,
 					curtlen * sizeof(struct tstat));
 

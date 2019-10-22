@@ -545,6 +545,7 @@ numeric(char *ns)
 unsigned long long
 getboot(void)
 {
+	//获取系统启动时间
 	static unsigned long long	boottime;
 	unsigned long long		getbootlinux(long);
 

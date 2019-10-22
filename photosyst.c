@@ -1770,15 +1770,18 @@ getbootlinux(long hertz)
 		bootjiffies = 1LL * ts.tv_sec  * hertz +
 		              1LL * ts.tv_nsec * hertz / 1000000000LL;
 
+		//取子进程的/proc/$pid/stat文件
 		snprintf(tmpbuf, sizeof tmpbuf, "/proc/%d/stat", cpid);
 
 		if ( (fp = fopen(tmpbuf, "r")) != NULL)
 		{
+			//取进程启动时的时间
 			if ( fscanf(fp, "%*d (%*[^)]) %*c %*d %*d %*d %*d "
 			                "%*d %*d %*d %*d %*d %*d %*d %*d "
 			                "%*d %*d %*d %*d %*d %*d %lu",
 			                &startticks) == 1)
 			{
+				//获得系统启动时的时间
 				bootjiffies -= startticks;
 			}
 
@@ -1788,6 +1791,7 @@ getbootlinux(long hertz)
 		/*
 		** kill the child and get rid of the zombie
 		*/
+		//杀掉此子进程,并等待子进程退出
 		kill(cpid, SIGKILL);
 		(void) wait((int *)0);
 	}

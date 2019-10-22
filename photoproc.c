@@ -170,7 +170,7 @@ static void	proccmd(struct tstat *);
 static void	procsmaps(struct tstat *);
 
 unsigned long
-photoproc(struct tstat *tasklist, int maxtask)
+photoproc(struct tstat *tasklist, int maxtask/*tasklist最大值*/)
 {
 	static int			firstcall = 1;
 	static unsigned long long	bootepoch;
@@ -227,6 +227,7 @@ photoproc(struct tstat *tasklist, int maxtask)
 	if ( getcwd(origdir, sizeof origdir) == NULL)
 		mcleanstop(53, "failed to save current dir\n");
 
+	//切换到/proc目录
 	if ( chdir("/proc") == -1)
 		mcleanstop(54, "failed to change to /proc\n");
 
@@ -252,7 +253,7 @@ photoproc(struct tstat *tasklist, int maxtask)
 		/*
  		** gather process-level information
 		*/
-		curtask	= tasklist+tval;
+		curtask	= tasklist+tval;/*当前待填充task信息*/
 
 		if ( !procstat(curtask, bootepoch, 1)) /* from /proc/pid/stat */
 		{
@@ -294,6 +295,7 @@ photoproc(struct tstat *tasklist, int maxtask)
 		*/
 		if (curtask->gen.nthr > 1)
 		{
+			//统计当前进程的线程记录
 			DIR		*dirtask;
 			struct dirent	*tent;
 
@@ -400,6 +402,7 @@ photoproc(struct tstat *tasklist, int maxtask)
 ** count number of tasks in the system, i.e.
 ** the number of processes plus the total number of threads
 */
+//总的进程线程数
 unsigned long
 counttasks(void)
 {
@@ -417,6 +420,7 @@ counttasks(void)
 	{
 		if ( fgets(linebuf, sizeof(linebuf), fp) != NULL)
 		{
+			//先获取总线程数
 			if ( sscanf(linebuf, "%*f %*f %*f %*d/%lu", &nr) < 1)
 				mcleanstop(53, "wrong /proc/loadavg\n");
 		}
@@ -435,11 +439,13 @@ counttasks(void)
 	if ( getcwd(origdir, sizeof origdir) == NULL)
 		mcleanstop(53, "cannot determine cwd\n");
 
+	//切换到/proc目录
 	if ( chdir("/proc") == -1)
 		mcleanstop(53, "cannot change to /proc\n");
 
 	dirp = opendir(".");
 
+	//再加上进程数
 	while ( (entp = readdir(dirp)) )
 	{
 		/*
@@ -454,6 +460,7 @@ counttasks(void)
 	if ( chdir(origdir) == -1)
 		mcleanstop(53, "cannot change to %s\n", origdir);
 
+	//返回进程数
 	return nr;
 }
 
@@ -537,6 +544,7 @@ procstat(struct tstat *curtask, unsigned long long bootepoch, char isproc)
 	/*
  	** normalization
 	*/
+	//换算进程的启动时间
 	curtask->gen.btime   = (curtask->gen.btime+bootepoch)/hertz;
 	curtask->cpu.prio   += 100; 	/* was subtracted by kernel */
 	curtask->mem.vmem   /= 1024;
@@ -626,6 +634,7 @@ procstatus(struct tstat *curtask)
 			continue;
 		}
 
+		//当前进程的线程数
 		if (memcmp(line, "Threads:", 8)==0)
 		{
 			sscanf(line, "Threads: %d", &(curtask->gen.nthr));
